@@ -42,22 +42,24 @@ export default function KanbanBoard() {
   const [defaultStatus, setDefaultStatus] = useState<'todo' | 'in-progress' | 'done'>('todo');
 
   useEffect(() => {
-    // Load tasks from localStorage
-    const savedTasks = localStorage.getItem('kanban-tasks');
-    if (savedTasks) {
-      const parsedTasks = JSON.parse(savedTasks);
-      setTasks(parsedTasks.map((task: Task) => ({
-        ...task,
-        createdAt: new Date(task.createdAt),
-      })));
-    } else {
-      setTasks(INITIAL_TASKS);
+    // Load tasks from localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      const savedTasks = localStorage.getItem('kanban-tasks');
+      if (savedTasks) {
+        const parsedTasks = JSON.parse(savedTasks);
+        setTasks(parsedTasks.map((task: Task) => ({
+          ...task,
+          createdAt: new Date(task.createdAt),
+        })));
+      } else {
+        setTasks(INITIAL_TASKS);
+      }
     }
   }, []);
 
   useEffect(() => {
-    // Save tasks to localStorage
-    if (tasks.length > 0) {
+    // Save tasks to localStorage (client-side only)
+    if (typeof window !== 'undefined' && tasks.length > 0) {
       localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
     }
   }, [tasks]);
@@ -92,7 +94,7 @@ export default function KanbanBoard() {
     } else {
       // Add new task
       const newTask: Task = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         title: taskData.title || '',
         description: taskData.description || '',
         status: taskData.status || 'todo',
